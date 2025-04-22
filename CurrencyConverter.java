@@ -1,20 +1,15 @@
 package com.example;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.awt.event.*;
+import java.util.*;
+import javax.swing.*;
 
 public class CurrencyConverter {
     public static void main(String[] args) {
-        // Currency options
+        // Hash Map (Dictionary) used to store key value pairs
         Map<String, Double> conversionRates = new HashMap<>();
+        conversionRates.put("---Select Currency---", 0.00); // Blank
+        conversionRates.put("Albanian Lek", 89.24); // Albanian Lek
         conversionRates.put("United States Dollar", 1.0);    // Base
         conversionRates.put("Euro", 0.91);   // Euro /done
         conversionRates.put("Russian Ruble", 85.8);   // Russian Ruble /done
@@ -52,7 +47,6 @@ public class CurrencyConverter {
         conversionRates.put("Chinese Yuan", 6.9);    // Chinese Yuan
         conversionRates.put("Japanese Yen", 144.57);  // Japanese Yen
         conversionRates.put("South Korean Won", 1350.0); // South Korean Won
-        conversionRates.put("Albanian Lek", 89.24); // Albanian Lek
         conversionRates.put("Aruban Florin", 1.8025); // Aruban Florin
         conversionRates.put("Belarusian Ruble", 3.2740); // Belarusian Ruble
         conversionRates.put("Bosnia-Herzegovina Convertible Mark", 1.7660); // Bosnia-Herzegovina Convertible Mark
@@ -72,28 +66,66 @@ public class CurrencyConverter {
         Arrays.sort(currencies); // This sorts all the values by alphabetical order
 
         // Components
-        JComboBox<String> fromCurrency = new JComboBox<>(currencies);
-        JComboBox<String> toCurrency = new JComboBox<>(currencies);
-        JTextField amountField = new JTextField();
-        JButton button = new JButton("Click Me!");
+        JComboBox<String> fromCurrency = new JComboBox<>(currencies); // creates a drop down menu with currencies
+        JComboBox<String> toCurrency = new JComboBox<>(currencies); // ^^^
+        JTextField amountField = new JTextField(); // allows you to input the desired amount
+        JButton swapButton = new JButton("Swap"); // this allows you to swap the two currencies
+        JButton clearButton = new JButton("Clear "); // this clears whatever you have selected
 
         // Panel to hold components
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        panel.add(new JLabel("Welcome to the Currency Converter!"));
+        // swap button code
+        swapButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get selected items
+                Object from = fromCurrency.getSelectedItem();
+                Object to = toCurrency.getSelectedItem();
+                
+                // Swap the selections
+                fromCurrency.setSelectedItem(to);
+                toCurrency.setSelectedItem(from);
+            }
+        });
+
+        // clear button code
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = JOptionPane.showConfirmDialog(
+                    null, 
+                            "Are you sure you want to clear everything?", 
+                            "Confirm Action", 
+                            JOptionPane.YES_NO_OPTION
+            );
+                if (result == JOptionPane.YES_OPTION) {
+                    fromCurrency.setSelectedItem("---Select Currency---");
+                    toCurrency.setSelectedItem("---Select Currency---");
+                }
+            }
+        });
+
+        // the menu screen
+        JLabel welcome = new JLabel("Welcome to the Currency Converter!");
+        welcome.setHorizontalAlignment(SwingConstants.RIGHT);
+        panel.add(welcome);
         panel.add(new JLabel("Convert from:"));
         panel.add(fromCurrency);
         panel.add(new JLabel("Convert to:"));
         panel.add(toCurrency);
         panel.add(new JLabel("Switch: "));
-        panel.add(button);
+        panel.add(swapButton);
+        panel.add(new JLabel("Clear: "));
+        panel.add(clearButton);
         panel.add(new JLabel("Enter amount:"));
         panel.add(amountField);
 
         int result = JOptionPane.showConfirmDialog(null, panel, 
                  "Currency Converter Menu", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
+        
         if (result == JOptionPane.OK_OPTION) {
             try {
                 String from = (String) fromCurrency.getSelectedItem();
@@ -103,11 +135,19 @@ public class CurrencyConverter {
                 double fromRate = conversionRates.get(from);
                 double toRate = conversionRates.get(to);
 
-                // Formula: amount * (toRate / fromRate)
+                if (fromRate == 0 || toRate == 0) {
+                    JOptionPane.showMessageDialog(
+                                null,
+                                "You need to select a currency",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // Formula: amount * (toRate / fromRate)
                 double converted = amount * (toRate / fromRate);
 
                 JOptionPane.showMessageDialog(null,
                         String.format("%.2f %s = %.2f %s", amount, from, converted, to));
+                }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Please enter a valid number.");
             }
