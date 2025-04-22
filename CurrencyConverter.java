@@ -138,7 +138,7 @@ public class CurrencyConverter {
                 if (fromRate == 0 || toRate == 0) {
                     JOptionPane.showMessageDialog(
                                 null,
-                                "You need to select a currency",
+                                "You need to select two currencies",
                                 "Error",
                                 JOptionPane.ERROR_MESSAGE);
                 } else {
